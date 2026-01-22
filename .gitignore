@@ -49,3 +49,15 @@ log/
 
 # Custom build directories
 2026-01-15.15.44/
+
+# Development tools and dependencies
+lvgl_editor/
+managed_components/
+
+# Local configuration files
+.agent/
+.devcontainer/
+.trae/
+
+# Font source files
+字体源文件/
