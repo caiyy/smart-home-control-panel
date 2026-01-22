@@ -1,0 +1,36 @@
+dependencies:
+  GT911:
+    dependencies: []
+    source:
+      path: /Users/codingsoul/Documents/Code/ESP32-S3-LVGL9-Aqara-IDF/components/GT911
+      type: local
+    version: 1.0.0
+  espressif/esp_jpeg:
+    component_hash: defb83669293cbf86d0fa86b475ba5517aceed04ed70db435388c151ab37b5d7
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.3.1
+  idf:
+    source:
+      type: idf
+    version: 5.5.0
+  lvgl/lvgl:
+    component_hash: 17e68bfd21f0edf4c3ee838e2273da840bf3930e5dbc3bfa6c1190c3aed41f9f
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 9.4.0
+direct_dependencies:
+- espressif/GT911
+- espressif/esp_jpeg
+- idf
+- lvgl/lvgl
+manifest_hash: 7ea7a3b6af222c3a3d9060e3a20b272d5a1cba2305b163ccf61534cd31ab9a9f
+target: esp32s3
+version: 2.0.0

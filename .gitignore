@@ -1,0 +1,51 @@
+# Build directory
+/build/
+
+# ESP-IDF configuration files
+/sdkconfig
+/sdkconfig.old
+/sdkconfig.*
+
+# Generated files
+*.bin
+*.elf
+*.map
+*.o
+*.a
+*.so
+*.d
+*.log
+*.trace
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Python files
+__pycache__/
+*.pyc
+
+# Log files
+log/
+*.log
+
+# Test files
+/test/
+
+# Documentation build files
+/docs/build/
+
+# Custom build directories
+2026-01-15.15.44/

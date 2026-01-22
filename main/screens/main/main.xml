@@ -1,0 +1,183 @@
+<screen >
+  <api>
+    <prop name="message" type="string" default="Hello World"/>
+  </api>
+  <styles>
+    <style name="view_style" width="480" height="480" border_width="0" pad_all="0" text_font="ht16" bg_color="0xF8F2E6" bg_grad_color="0xF5E5E3" bg_grad_dir="ver"/>
+    <style name="label_style" align="top_left" pad_all="0" />
+    <style name="play_progress_main" width="110" height="110" bg_opa="0" arc_color="0xff3b80" arc_opa="50%" arc_width="5" />
+    <style name="play_progress_knob" pad_all="0" bg_opa="0%" />
+    <style name="play_progress_indicator" arc_color="0xff3b80" arc_opa="100%" arc_width="5" />
+    <style name="style_base" text_color="0xff3b80" width="184" bg_color="0xf8a5c2" height="content" bg_opa="30%" pad_all="10" radius="15" border_opa="20%" border_width="2" />
+    <style name="play_slider_main" width="40" height="230" pad_all="0" bg_opa="50%" radius="15" border_width="0" bg_color="0xffffff"/>
+    <style name="play_slider_knob" bg_opa="0" pad_all="0"/>
+    <style name="play_slider_indicator" bg_color="0xffffff" bg_opa="100%" radius="15" />
+    <!-- 开关按钮样式 -->
+    <style name="switch_off" width="66" height="content" border_width="2" border_opa="50%" border_color="0x99A1AF" bg_color="0xE5E7EB" text_color="0x99A1AF" flex_flow="column" pad_all="2" layout="flex" flex_main_place="center" flex_cross_place="center" pad_row="0"/>
+    <style name="switch_on" border_color="0xFFD43A" bg_color="0xFEF3C6" text_color="0xE17100" />
+    <style name="switch_icon_off" image_recolor="0x99A1AF" image_recolor_opa="100%" width="50" height="50"  />
+    <style name="switch_icon_on" image_recolor="0xE17100" />
+  </styles>
+  <view style_radius="20">
+    <style name="view_style"/>
+    <!-- 这里是时间部分 -->
+    <lv_obj y="10" x="10" width="content" style_bg_color="0x63cdda" style_border_color="0x63cdda">
+      <style name="style_base"/>
+      <lv_label name="date_label" width="content" bind_text="date_subject" x="0" y="00" recolor="true">
+        <style name="label_style"/>
+      </lv_label>
+      <lv_label name="time_label" bind_text="time_subject" recolor="true" x="0" y="20" style_text_font="time_100">
+        <style name="label_style"/>
+      </lv_label>
+      <lv_label name="weekday_label" bind_text="weekday_subject" recolor="true" x="0" y="100">
+        <style name="label_style"/>
+      </lv_label>
+    </lv_obj>
+    <!-- 这里是播放器部分 184x314 -->
+    <lv_obj y="160" x="10" height="310" style_border_color="0xf8a5c2">
+      <style name="style_base"/>
+      <lv_arc max_value="10000" min_value="0" value="10" bg_start_angle="0" bg_end_angle="360" rotation="270" bind_value="play_progress_subject">
+        <lv_image name="cover_img" width="100" height="100" bind_src="cover_img_subject" align="center" style_radius="50"/>
+        <style name="play_progress_main" selector="main" />
+        <style name="play_progress_knob" selector="knob" />
+        <style name="play_progress_indicator" selector="indicator" />
+      </lv_arc>
+      <!-- 这里显示歌名 -->
+      <lv_label width="110" long_mode="scroll_circular" height="18" name="song_name_label" text="不能说的秘密" bind_text="song_name_subject" x="0" y="120" style_text_color="0xff3b80">
+        <style name="label_style"/>
+      </lv_label>
+      <!-- 这里显示歌手 -->
+      <lv_label width="110" long_mode="scroll_circular" height="18" name="song_artist_label" text="周杰伦" bind_text="song_artist_subject" x="0" y="145" style_text_color="0xff3b80">
+        <style name="label_style"/>
+      </lv_label>
+      <!-- 这里显示播放时间 -->
+      <lv_label style_text_font="LV_FONT_MONTSERRAT_14" width="160" height="18" name="song_time_label" text="00:00 / 00:00" bind_text="song_time_subject" x="0" y="170" style_text_color="0xff3b80">
+        <style name="label_style"/>
+      </lv_label>
+      <!-- 这里显示控制按钮 -->
+      <lv_obj y="195" x="0" width="110" height="40" style_bg_opa="0" style_border_width="0" style_pad_all="0" flex_flow="row" style_flex_main_place="center" style_flex_cross_place="center" style_pad_column="10">
+        <lv_button name="prev_btn_obj" width="30" height="30" style_bg_opa="0" style_border_width="0" style_pad_all="0" >
+          <lv_image name="prev_btn" src="ICON_PREV" align="center" style_image_recolor="0xff3b80" style_image_recolor_opa="100%" />
+          <event_cb callback="play_prev_cb" trigger="clicked"/>
+        </lv_button>
+        <lv_button name="play_btn_obj" width="30" height="30" style_bg_opa="0" style_border_width="0" style_pad_all="0" >
+          <lv_image name="play_btn" src="ICON_PLAY" align="center" style_image_recolor="0xff3b80" style_image_recolor_opa="100%" />
+          <event_cb callback="play_pause_cb" trigger="clicked"/>
+        </lv_button>
+        <lv_button name="next_btn_obj" width="30" height="30" style_bg_opa="0" style_border_width="0" style_pad_all="0" >
+          <lv_image name="next_btn" src="ICON_NEXT" align="center" style_image_recolor="0xff3b80" style_image_recolor_opa="100%" />
+          <event_cb callback="play_next_cb" trigger="clicked"/>
+        </lv_button>
+      </lv_obj>
+      <!-- 这里显示歌词 -->
+      <lv_label width="160" long_mode="label_long_wrap" name="song_lyrics_label" text="你说把爱渐渐放下会走更远 又何必去改变已错过的时间" bind_text="song_lyrics_subject" x="0" y="235"  style_text_color="0xff3b80">
+        <style name="label_style"/>
+      </lv_label>
+      <!-- 这里是音量控制 -->
+      <lv_slider name="song_slider" x="120" min_value="0" max_value="100" value="50" bind_value="volume_subject_value">
+        <lv_label text="40" style_align="top_mid" y="5" style_text_color="0xff3b80" bind_text="volume_subject_value" />
+        <style name="play_slider_main" selector="main" />
+        <style name="play_slider_knob" selector="knob" />
+        <style name="play_slider_indicator" selector="indicator" />
+        <lv_image name="volume_icon" align="bottom_mid" y="-10" style_image_recolor="0xff3b80" style_image_recolor_opa="100%" />
+      </lv_slider>
+    </lv_obj>
+    <!-- 这里显示天气 -->
+    <lv_obj name="weather_container" style_text_color="0xfb804c" y="10" x="-60" width="135" height="content" style_align="top_right" style_bg_color="#f19066" style_border_color="0xf19066" style_text_font="LV_FONT_MONTSERRAT_14" >
+      <style name="style_base"/>
+      <event_cb callback="weather_click_cb" trigger="clicked"/>
+      <lv_label bind_text="weather_desc_subject" x="0" y="0" style_align="top_left" style_text_color="0xe15f41" style_text_font="ht16" />
+      <lv_label bind_text="weather_temp_subject" x="30" y="0" style_align="top_left" recolor="true" />
+      <lv_label bind_text="weather_hum_subject" x="0" y="0" style_align="top_right" recolor="true" />
+      <!-- 这里显示室内温湿度 -->
+      <lv_label bind_text="indoor_temp_subject" recolor="true" x="30" y="18" style_align="top_left"/>
+      <lv_label bind_text="indoor_hum_subject" recolor="true" x="0" y="18" style_align="top_right"/>
+    </lv_obj>
+    <!-- 这里显示智能家居控制 -->
+    <lv_obj style_bg_opa="0" style_pad_all="0" y="160" x="202" width="220" height="content" style_align="top_left" style_border_width="0" flex_flow="row_wrap" style_flex_main_place="center">
+      <style name="style_base"/>
+      <lv_button name="switch_1" style_pad_all="0">
+        <style name="switch_off" />
+        <bind_style name="switch_on" subject="switch_1_state" ref_value="1" />
+        <lv_image name="sw_icon_1">
+          <style name="switch_icon_off" />
+          <bind_style name="switch_icon_on" subject="switch_1_state" ref_value="1" />
+        </lv_image>
+        <lv_label text="房间灯" />
+        <event_cb callback="switch_1_cb" trigger="clicked"/>
+      </lv_button>
+      <lv_button name="switch_2" style_pad_all="0" style_pad_left="-1">
+        <style name="switch_off" />
+        <bind_style name="switch_on" subject="switch_2_state" ref_value="1" />
+        <lv_image name="sw_icon_2">
+          <style name="switch_icon_off" />
+          <bind_style name="switch_icon_on" subject="switch_2_state" ref_value="1" />
+        </lv_image>
+        <lv_label text="屏幕1" />
+        <event_cb callback="switch_2_cb" trigger="clicked"/>
+      </lv_button>
+      <lv_button name="switch_3" style_pad_all="0" style_pad_left="-1">
+        <style name="switch_off" />
+        <bind_style name="switch_on" subject="switch_3_state" ref_value="1" />
+        <lv_image name="sw_icon_3">
+          <style name="switch_icon_off" />
+          <bind_style name="switch_icon_on" subject="switch_3_state" ref_value="1" />
+        </lv_image>
+        <lv_label text="屏幕2" />
+        <event_cb callback="switch_3_cb" trigger="clicked"/>
+      </lv_button>
+      <lv_button name="switch_4" style_pad_all="0">
+        <style name="switch_off" />
+        <bind_style name="switch_on" subject="switch_4_state" ref_value="1" />
+        <lv_image name="sw_icon_4">
+          <style name="switch_icon_off" />
+          <bind_style name="switch_icon_on" subject="switch_4_state" ref_value="1" />
+        </lv_image>
+        <lv_label text="音箱" />
+        <event_cb callback="switch_4_cb" trigger="clicked"/>
+      </lv_button>
+      <lv_button name="switch_5" style_pad_all="0" disabled="true">
+        <style name="switch_off" />
+        <bind_style name="switch_on" subject="switch_5_state" ref_value="1" />
+        <lv_image name="sw_icon_5">
+          <style name="switch_icon_off" />
+          <bind_style name="switch_icon_on" subject="switch_5_state" ref_value="1" />
+        </lv_image>
+        <lv_label text="预留" />
+        <event_cb callback="switch_5_cb" trigger="clicked"/>
+      </lv_button>
+      <lv_button name="switch_6" style_pad_all="0" disabled="true">
+        <style name="switch_off" />
+        <bind_style name="switch_on" subject="switch_6_state" ref_value="1" />
+        <lv_image name="sw_icon_6">
+          <style name="switch_icon_off" />
+          <bind_style name="switch_icon_on" subject="switch_6_state" ref_value="1" />
+        </lv_image>
+        <lv_label text="预留" />
+        <event_cb callback="switch_6_cb" trigger="clicked"/>
+      </lv_button>
+    </lv_obj>
+    <!-- 能耗显示标签 -->
+    <lv_obj style_text_font="LV_FONT_MONTSERRAT_14" style_text_color="0x000000" y="-10" x="202" style_pad_all="3" style_pad_left="10" style_pad_right="10" style_margin_all="0" width="220" height="content" style_align="bottom_left" style_bg_color="0x7bed9f" style_border_color="0x7bed9f" >
+      <style name="style_base"/>
+      <lv_label text="ENERGY" align="top_left" y="0" style_text_color="0x04905E" />
+      <lv_label bind_text="power_subject" align="top_right" y="0" recolor="true" />
+      <lv_label text="TODAY" align="top_left" y="18" style_text_color="0x5F6777" />
+      <lv_label text="MONTH" align="top_right" y="18" style_text_color="0x5F6777"/>
+      <lv_label bind_text="daily_energy_subject" align="top_left" style_pad_all="0" style_margin_all="0" y="36" x="-2" recolor="true" />
+      <lv_label bind_text="monthly_energy_subject" align="top_right" style_pad_all="0" style_margin_all="0" y="36" recolor="true" />
+    </lv_obj>
+    <!-- 自动亮度按钮 -->
+    <lv_button x="-8" y="110" width="44" height="40" style_pad_all="0" style_bg_color="0xFEF3C6" style_text_color="0xE17100" style_border_color="0xFFD43A" style_border_opa="20%" style_border_width="2" style_align="top_right">
+      <lv_label text="AUTO" align="center" />
+    </lv_button>
+    <!-- 这是亮度控制 -->
+    <lv_slider name="brightness_slider" x="-10" y="160" height="264" min_value="0" max_value="100" value="50" bind_value="brightness_subject_value" style_align="top_right">
+      <lv_label text="40" style_align="top_mid" y="5" style_text_color="0xff3b80" bind_text="brightness_subject_value" />
+      <style name="play_slider_main" selector="main" />
+      <style name="play_slider_knob" selector="knob" />
+      <style name="play_slider_indicator" selector="indicator" />
+      <lv_image name="brightness_icon" align="bottom_mid" y="-10" style_image_recolor="0xff3b80" style_image_recolor_opa="100%" />
+    </lv_slider>
+  </view>
+</screen>

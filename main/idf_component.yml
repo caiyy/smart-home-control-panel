@@ -1,0 +1,4 @@
+dependencies:
+  lvgl/lvgl: '*'
+  GT911: '*'
+  espressif/esp_jpeg: "*"
