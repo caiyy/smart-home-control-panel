@@ -24,7 +24,7 @@ char* http_send_request(const http_config_t *config) {
     esp_http_client_config_t client_config = {
         .url = config->url,
         .method = config->method,
-        .timeout_ms = config->timeout_ms > 0 ? config->timeout_ms : 5000,
+        .timeout_ms = config->timeout_ms > 0 ? config->timeout_ms : 3000, // 减少默认超时时间从5秒到3秒
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
         .crt_bundle_attach = NULL, // 明确禁用证书包，防止 HTTPS 干扰
 #endif

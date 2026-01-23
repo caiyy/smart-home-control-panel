@@ -238,6 +238,8 @@ void ha_monitor_task(void *arg)
         // 1. 更新能耗数据 (30秒)
         if ((now - last_energy_update) >= energy_update_interval) {
             last_energy_update = now;
+            
+            // 获取每日能耗
             char *d_s = get_daily_energy();
             if (d_s) {
                 float d_v = atof(d_s);
@@ -252,6 +254,9 @@ void ha_monitor_task(void *arg)
                 }
                 free(d_s);
             }
+            esp_task_wdt_reset(); // 重置看门狗
+            
+            // 获取每月能耗
             char *m_s = get_monthly_energy();
             if (m_s) {
                 float m_v = atof(m_s);
@@ -266,8 +271,9 @@ void ha_monitor_task(void *arg)
                 }
                 free(m_s);
             }
+            esp_task_wdt_reset(); // 重置看门狗
 
-            // 获取室内温湿度
+            // 获取室内温度
             char *i_t = get_entity_state("sensor.zhimi_cn_94444656_ma2_temperature_p_3_3");
             if (i_t) {
                 if (strcmp(i_t, current_indoor_temp) != 0) {
@@ -281,6 +287,9 @@ void ha_monitor_task(void *arg)
                 }
                 free(i_t);
             }
+            esp_task_wdt_reset(); // 重置看门狗
+            
+            // 获取室内湿度
             char *i_h = get_entity_state("sensor.zhimi_cn_94444656_ma2_relative_humidity_p_3_1");
             if (i_h) {
                 if (strcmp(i_h, current_indoor_hum) != 0) {
@@ -294,7 +303,7 @@ void ha_monitor_task(void *arg)
                 }
                 free(i_h);
             }
-            esp_task_wdt_reset();
+            esp_task_wdt_reset(); // 重置看门狗
         }
 
         // 2. 更新开关状态 (30秒)
@@ -326,6 +335,7 @@ void ha_monitor_task(void *arg)
         bool time_synced = (time(NULL) > 1700000000); 
         if (time_synced && (last_weather_update == 0 || (now - last_weather_update) >= weather_update_interval)) {
             last_weather_update = now;
+            esp_task_wdt_reset(); // 重置看门狗
             
             struct tm timeinfo;
             time_t now_time;
@@ -333,19 +343,25 @@ void ha_monitor_task(void *arg)
             localtime_r(&now_time, &timeinfo);
             char date_str[16];
             strftime(date_str, sizeof(date_str), "%Y-%m-%d", &timeinfo);
+            
+            esp_task_wdt_reset(); // 重置看门狗
 
             char weather_url[512];
             snprintf(weather_url, sizeof(weather_url), 
                 "http://api.open-meteo.com/v1/forecast?latitude=22.495&longitude=113.2678&start_date=%s&end_date=%s&hourly=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature&timezone=Asia/Shanghai",
                 date_str, date_str);
+            
+            esp_task_wdt_reset(); // 重置看门狗
 
             http_config_t http_cfg = {
                 .url = weather_url,
                 .method = HTTP_METHOD_GET,
-                .timeout_ms = 8000
+                .timeout_ms = 5000 // 减少超时时间从8秒到5秒
             };
 
             char *response = http_send_request(&http_cfg);
+            esp_task_wdt_reset(); // 重置看门狗，HTTP请求完成后立即重置
+            
             if (response) {
                 cJSON *root = cJSON_Parse(response);
                 if (root) {
@@ -379,6 +395,8 @@ void ha_monitor_task(void *arg)
                             }
                             ESP_LOGI(TAG, "已保存 %d 小时天气数据", g_24h_weather_count);
                             
+                            esp_task_wdt_reset(); // 重置看门狗
+                            
                             // 查找当前小时的索引用于UI更新
                             for (int i = 0; i < size; i++) {
                                 cJSON *time_item = cJSON_GetArrayItem(times, i);
@@ -393,6 +411,8 @@ void ha_monitor_task(void *arg)
                                 }
                             }
                             
+                            esp_task_wdt_reset(); // 重置看门狗
+                            
                             // 更新当前小时的UI显示
                             if (idx != -1) {
                                 cJSON *c = cJSON_GetArrayItem(codes, idx);
@@ -405,8 +425,8 @@ void ha_monitor_task(void *arg)
                                     uu = malloc(sizeof(ui_update_t));
                                     if (uu) { uu->type = UI_UPDATE_TYPE_WEATHER_DESC; sprintf(uu->value.str_value, "%s", desc); event_system_post(EVENT_TYPE_UI_UPDATE, uu, sizeof(ui_update_t)); }
                                     cJSON *at = cJSON_GetArrayItem(apparent_temps, idx);
-                                uu = malloc(sizeof(ui_update_t));
-                                if (uu) { uu->type = UI_UPDATE_TYPE_WEATHER_TEMP; sprintf(uu->value.str_value, "%d|%dC", (int)t->valuedouble, (int)at->valuedouble); event_system_post(EVENT_TYPE_UI_UPDATE, uu, sizeof(ui_update_t)); }
+                                    uu = malloc(sizeof(ui_update_t));
+                                    if (uu) { uu->type = UI_UPDATE_TYPE_WEATHER_TEMP; sprintf(uu->value.str_value, "%d|%dC", (int)t->valuedouble, (int)at->valuedouble); event_system_post(EVENT_TYPE_UI_UPDATE, uu, sizeof(ui_update_t)); }
                                     uu = malloc(sizeof(ui_update_t));
                                     if (uu) { uu->type = UI_UPDATE_TYPE_WEATHER_HUM; sprintf(uu->value.str_value, "%.0f%%", h->valuedouble); event_system_post(EVENT_TYPE_UI_UPDATE, uu, sizeof(ui_update_t)); }
                                 }
@@ -417,7 +437,7 @@ void ha_monitor_task(void *arg)
                 }
                 free(response);
             }
-            esp_task_wdt_reset();
+            esp_task_wdt_reset(); // 重置看门狗
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
