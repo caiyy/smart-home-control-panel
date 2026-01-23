@@ -3,24 +3,36 @@
 #include "esp_log.h"
 #include "esp_http_client.h"
 #include "http_service.h"
+#include "lwip/ip4_addr.h"
+#include "lwip/netdb.h"
 
 static const char *TAG = "http_service";
 
 // 外部WiFi状态检查函数
 extern bool is_wifi_connected(void);
 
-char* http_send_request(const http_config_t *config) {
-    if (config == NULL || config->url == NULL) {
-        ESP_LOGE(TAG, "Invalid arguments");
-        return NULL;
+// 网络可达性检查函数
+static bool is_network_reachable(void) {
+    struct addrinfo hints, *res;
+    int err;
+    
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    
+    // 尝试解析Google DNS服务器，检查网络可达性
+    err = getaddrinfo("8.8.8.8", "53", &hints, &res);
+    if (err != 0) {
+        ESP_LOGD(TAG, "网络不可达: 错误码 %d", err);
+        return false;
     }
+    
+    freeaddrinfo(res);
+    return true;
+}
 
-    // 检查WiFi连接状态
-    if (!is_wifi_connected()) {
-        ESP_LOGW(TAG, "WiFi未连接,跳过HTTP请求: %s", config->url);
-        return NULL;
-    }
-
+// 内部HTTP请求函数
+static char* http_send_request_internal(const http_config_t *config) {
     esp_http_client_config_t client_config = {
         .url = config->url,
         .method = config->method,
@@ -111,4 +123,51 @@ char* http_send_request(const http_config_t *config) {
 
     esp_http_client_cleanup(client);
     return response_buf;
+}
+
+// HTTP请求重试函数
+char* http_send_request_with_retry(const http_config_t *config, int max_retries) {
+    char *response = NULL;
+    int retries = 0;
+    
+    while (retries < max_retries) {
+        // 检查网络可达性
+        if (!is_network_reachable()) {
+            ESP_LOGW(TAG, "网络不可达,跳过HTTP请求重试: %s", config->url);
+            break;
+        }
+        
+        response = http_send_request_internal(config);
+        if (response != NULL) {
+            break;
+        }
+        
+        retries++;
+        ESP_LOGW(TAG, "HTTP请求失败，重试 %d/%d", retries, max_retries);
+        vTaskDelay(pdMS_TO_TICKS(500 * retries)); // 指数退避延迟
+    }
+    
+    return response;
+}
+
+char* http_send_request(const http_config_t *config) {
+    if (config == NULL || config->url == NULL) {
+        ESP_LOGE(TAG, "Invalid arguments");
+        return NULL;
+    }
+
+    // 检查WiFi连接状态
+    if (!is_wifi_connected()) {
+        ESP_LOGW(TAG, "WiFi未连接,跳过HTTP请求: %s", config->url);
+        return NULL;
+    }
+    
+    // 检查网络可达性
+    if (!is_network_reachable()) {
+        ESP_LOGW(TAG, "网络不可达,跳过HTTP请求: %s", config->url);
+        return NULL;
+    }
+
+    // 直接调用内部函数，不使用重试机制
+    return http_send_request_internal(config);
 }

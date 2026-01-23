@@ -359,7 +359,7 @@ void ha_monitor_task(void *arg)
                 .timeout_ms = 5000 // 减少超时时间从8秒到5秒
             };
 
-            char *response = http_send_request(&http_cfg);
+            char *response = http_send_request_with_retry(&http_cfg, 3); // 使用重试机制，最多重试3次
             esp_task_wdt_reset(); // 重置看门狗，HTTP请求完成后立即重置
             
             if (response) {

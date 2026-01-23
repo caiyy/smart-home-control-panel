@@ -22,4 +22,13 @@ typedef struct {
  */
 char* http_send_request(const http_config_t *config);
 
+/**
+ * @brief 发送 HTTP 请求并获取响应内容（带重试机制）
+ * 
+ * @param config 请求配置
+ * @param max_retries 最大重试次数
+ * @return char* 响应内容字符串（需手动 free），失败返回 NULL
+ */
+char* http_send_request_with_retry(const http_config_t *config, int max_retries);
+
 #endif // HTTP_SERVICE_H

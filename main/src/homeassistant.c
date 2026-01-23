@@ -35,7 +35,7 @@ char *get_entity_state(const char *entity_id) {
         .timeout_ms = 3000
     };
 
-    char *response = http_send_request(&http_cfg);
+    char *response = http_send_request_with_retry(&http_cfg, 2); // 使用重试机制，最多重试2次
     char *state = NULL;
 
     if (response) {
@@ -94,7 +94,7 @@ esp_err_t call_ha_service(const char *domain, const char *service, const char *e
         .timeout_ms = 3000
     };
 
-    char *response = http_send_request(&http_cfg);
+    char *response = http_send_request_with_retry(&http_cfg, 2); // 使用重试机制，最多重试2次
     if (response) {
         ESP_LOGI(TAG, "服务调用成功，响应: %s", response);
         free(response);
